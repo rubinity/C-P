@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ExerciseCard } from "@/components/exercise-card";
 import { Button } from "@/components/ui/button";
 import { type Exercise, type Complexity } from "@/lib/exercises";
-import { BookOpen, CheckCircle, RotateCcw } from "lucide-react";
+import { BookOpen, CheckCircle, RotateCcw, Clock } from "lucide-react";
 
 interface ExerciseListProps {
   exercises: Exercise[];
@@ -25,12 +25,19 @@ export function ExerciseList({
 }: ExerciseListProps) {
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isChecked, setIsChecked] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [timePerBlank, setTimePerBlank] = useState<number | null>(null);
 
-  // Reset state when exercises change (complexity or preposition mode changed)
+  // Reset state and start timer when exercises change
   useEffect(() => {
     setUserAnswers({});
     setIsChecked(false);
-  }, [complexity, prepositionsMode]);
+    setTimePerBlank(null);
+    // Start timer when exercises are loaded
+    if (exercises.length > 0) {
+      setStartTime(Date.now());
+    }
+  }, [exercises, complexity, prepositionsMode]);
 
   const handleAnswerChange = (blankId: string, value: string) => {
     setUserAnswers((prev) => ({
@@ -40,12 +47,21 @@ export function ExerciseList({
   };
 
   const handleCheck = () => {
+    if (startTime) {
+      const totalTime = (Date.now() - startTime) / 1000; // in seconds
+      const blanksCount = exercises.reduce((sum, ex) => sum + ex.blanks.length, 0);
+      if (blanksCount > 0) {
+        setTimePerBlank(totalTime / blanksCount);
+      }
+    }
     setIsChecked(true);
   };
 
   const handleReset = () => {
     setUserAnswers({});
     setIsChecked(false);
+    setTimePerBlank(null);
+    setStartTime(Date.now());
   };
 
   // Calculate score when checked
@@ -100,8 +116,16 @@ export function ExerciseList({
         </div>
 
         {isChecked && (
-          <div className="rounded-md bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-            Score: {correctAnswers} / {totalBlanks}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="rounded-md bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+              Score: {correctAnswers} / {totalBlanks}
+            </div>
+            {timePerBlank !== null && (
+              <div className="flex items-center gap-2 rounded-md bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
+                <Clock className="h-4 w-4" />
+                {timePerBlank.toFixed(1)}s per blank
+              </div>
+            )}
           </div>
         )}
       </div>
