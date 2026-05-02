@@ -3,22 +3,85 @@
 import { useState } from "react";
 import { SettingsPanel } from "@/components/settings-panel";
 import { ExerciseList } from "@/components/exercise-list";
-import { getExercises, type Complexity, type Exercise } from "@/lib/exercises";
+import { type Complexity, type Exercise } from "@/lib/exercises";
 import { GraduationCap } from "lucide-react";
+
+// Transform API response to match our Exercise interface
+interface APIBlank {
+  id: string;
+  stem: string | null;
+  prompt: string | null;
+  answer: string;
+}
+
+interface APIExercise {
+  id: string;
+  parts: string[];
+  blanks: APIBlank[];
+}
+
+function transformAPIResponse(apiExercises: APIExercise[]): Exercise[] {
+  return apiExercises.map((ex, index) => {
+    // Interleave parts and blank references
+    const parts: (string | { blankId: string })[] = [];
+    
+    for (let i = 0; i < ex.parts.length; i++) {
+      if (ex.parts[i]) {
+        parts.push(ex.parts[i]);
+      }
+      if (i < ex.blanks.length) {
+        parts.push({ blankId: ex.blanks[i].id });
+      }
+    }
+    
+    return {
+      id: index + 1,
+      parts,
+      blanks: ex.blanks.map((b) => ({
+        id: b.id,
+        stem: b.stem || undefined,
+        prompt: b.prompt || undefined,
+        correctAnswer: b.answer,
+      })),
+    };
+  });
+}
 
 export default function Home() {
   const [complexity, setComplexity] = useState<Complexity>("simple");
   const [prepositionsMode, setPrepositionsMode] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentSettings, setCurrentSettings] = useState<{
     complexity: Complexity;
     prepositionsMode: boolean;
   } | null>(null);
 
-  const handleGenerate = () => {
-    const newExercises = getExercises(complexity, prepositionsMode);
-    setExercises(newExercises);
-    setCurrentSettings({ complexity, prepositionsMode });
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ complexity, prepositionsMode }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to generate exercises");
+      }
+      
+      const data = await response.json();
+      const transformedExercises = transformAPIResponse(data.exercises);
+      setExercises(transformedExercises);
+      setCurrentSettings({ complexity, prepositionsMode });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -51,11 +114,17 @@ export default function Home() {
               prepositionsMode={prepositionsMode}
               setPrepositionsMode={setPrepositionsMode}
               onGenerate={handleGenerate}
+              isLoading={isLoading}
             />
           </aside>
 
           {/* Exercises Area */}
           <section>
+            {error && (
+              <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
+                {error}
+              </div>
+            )}
             <ExerciseList
               exercises={exercises}
               complexity={currentSettings?.complexity || complexity}

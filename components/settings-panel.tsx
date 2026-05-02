@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { type Complexity } from "@/lib/exercises";
+import { Loader2 } from "lucide-react";
 
 interface SettingsPanelProps {
   complexity: Complexity;
@@ -11,6 +12,7 @@ interface SettingsPanelProps {
   prepositionsMode: boolean;
   setPrepositionsMode: (mode: boolean) => void;
   onGenerate: () => void;
+  isLoading?: boolean;
 }
 
 const complexityOptions: { value: Complexity; label: string; description: string }[] = [
@@ -25,6 +27,7 @@ export function SettingsPanel({
   prepositionsMode,
   setPrepositionsMode,
   onGenerate,
+  isLoading = false,
 }: SettingsPanelProps) {
   return (
     <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -70,8 +73,15 @@ export function SettingsPanel({
         </div>
 
         {/* Generate Button */}
-        <Button onClick={onGenerate} className="w-full" size="lg">
-          Generate Exercises
+        <Button onClick={onGenerate} className="w-full" size="lg" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            "Generate Exercises"
+          )}
         </Button>
       </div>
     </div>
