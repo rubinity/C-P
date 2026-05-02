@@ -87,13 +87,25 @@ RULES:
 - Use realistic, practical sentences
 - Subject pronouns (nominative) should be regular text, NOT blanks
 
+CRITICAL - PARTS STRUCTURE:
+- The "parts" array contains the TEXT BETWEEN blanks only
+- Do NOT include the stem in the parts - the stem is ONLY in the blank object
+- The stem will be rendered before the input field automatically
+
 EXAMPLES:
-For "Er wartet auf seinen kleinen Bruder":
-- With prepositions: parts: ["Er wartet ", " sein", " klein", " Bruder."], blanks: [{stem:null,prompt:null,answer:"auf"}, {stem:"ein",answer:"en"}, {stem:"klein",answer:"en"}]
-- Without prepositions: parts: ["Er wartet auf sein", " klein", " Bruder."], blanks: [{stem:"ein",answer:"en"}, {stem:"klein",answer:"en"}]
+For "Er wartet auf seinen kleinen Bruder" (with prepositions mode):
+- Full sentence with blanks: "Er wartet [blank:auf] [blank:sein+en] [blank:klein+en] Bruder."
+- parts: ["Er wartet ", " ", " Bruder."]
+- blanks: [{stem:null, prompt:null, answer:"auf"}, {stem:"sein", prompt:null, answer:"en"}, {stem:"klein", prompt:null, answer:"en"}]
 
 For "Sie gibt ihm das Buch" (ihm is dative of er):
-- parts: ["Sie gibt ", " d", " Buch."], blanks: [{stem:null,prompt:"er",answer:"ihm"}, {stem:"d",answer:"as"}]`;
+- Full sentence with blanks: "Sie gibt [blank:ihm with prompt er] [blank:d+as] Buch."
+- parts: ["Sie gibt ", " ", " Buch."]
+- blanks: [{stem:null, prompt:"er", answer:"ihm"}, {stem:"d", prompt:null, answer:"as"}]
+
+For "Der kleine Hund" (simple article + adjective):
+- parts: ["", " ", " Hund"]
+- blanks: [{stem:"d", prompt:null, answer:"er"}, {stem:"klein", prompt:null, answer:"e"}]`;
 
   const { output } = await generateText({
     model: "anthropic/claude-sonnet-4-20250514",
