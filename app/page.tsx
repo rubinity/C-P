@@ -53,6 +53,7 @@ export default function Home() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generationKey, setGenerationKey] = useState(0);
   const [currentSettings, setCurrentSettings] = useState<{
     complexity: Complexity;
     prepositionsMode: boolean;
@@ -77,6 +78,7 @@ export default function Home() {
       const transformedExercises = transformAPIResponse(data.exercises);
       setExercises(transformedExercises);
       setCurrentSettings({ complexity, prepositionsMode });
+      setGenerationKey((k) => k + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -126,6 +128,7 @@ export default function Home() {
               </div>
             )}
             <ExerciseList
+              key={generationKey}
               exercises={exercises}
               complexity={currentSettings?.complexity || complexity}
               prepositionsMode={currentSettings?.prepositionsMode || prepositionsMode}
