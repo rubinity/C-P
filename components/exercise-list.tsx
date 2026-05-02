@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExerciseCard } from "@/components/exercise-card";
 import { Button } from "@/components/ui/button";
 import { type Exercise, type Complexity } from "@/lib/exercises";
@@ -25,6 +25,12 @@ export function ExerciseList({
 }: ExerciseListProps) {
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isChecked, setIsChecked] = useState(false);
+
+  // Reset state when exercises change (complexity or preposition mode changed)
+  useEffect(() => {
+    setUserAnswers({});
+    setIsChecked(false);
+  }, [complexity, prepositionsMode]);
 
   const handleAnswerChange = (blankId: string, value: string) => {
     setUserAnswers((prev) => ({

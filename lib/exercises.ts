@@ -3,7 +3,7 @@ export type Complexity = "simple" | "intermediate" | "advanced";
 export interface Blank {
   id: string;
   stem?: string; // e.g., "d", "ein", "klein" - appears before input
-  prompt?: string; // e.g., "er", "sie" - the nominative form shown in brackets
+  prompt?: string; // e.g., "er", "sie" - the nominative form shown in brackets for pronouns
   correctAnswer: string; // Only the ending for stem words, full word for prompts
 }
 
@@ -23,7 +23,7 @@ export interface ExerciseSet {
 // Template uses markers:
 // - {d__} for stem+ending (user fills ending)
 // - {(er)} for pronoun with nominative form shown (user writes declined form)
-// - {prep:auf} for prepositions (user fills whole word, hint shown)
+// - {___} for prepositions (blank with no hint)
 function createExercise(
   id: number,
   template: string,
@@ -50,7 +50,7 @@ function createExercise(
     
     parts.push({ blankId });
     
-    // Check if it's a prompt in parentheses like (er), (sie), (wir)
+    // Check if it's a prompt in parentheses like (er), (sie), (wir) - nominative pronoun
     if (marker.startsWith("(") && marker.endsWith(")")) {
       blanks.push({
         id: blankId,
@@ -58,11 +58,11 @@ function createExercise(
         correctAnswer: fullAnswer,
       });
     }
-    // Check if it's a preposition hint like prep:auf
-    else if (marker.startsWith("prep:")) {
+    // Check if it's a preposition blank (no hint)
+    else if (marker === "___") {
       blanks.push({
         id: blankId,
-        prompt: marker.slice(5), // The preposition hint
+        // No stem, no prompt - just empty blank
         correctAnswer: fullAnswer,
       });
     }
@@ -79,7 +79,6 @@ function createExercise(
     else {
       blanks.push({
         id: blankId,
-        prompt: marker,
         correctAnswer: fullAnswer,
       });
     }
@@ -99,6 +98,8 @@ function createExercise(
 // Example exercises for each complexity level and preposition mode
 // Note: Subject pronouns (nominative) are NOT blanks - they appear as regular text
 // Only pronouns that need to be declined (dative, accusative) are blanks with nominative shown
+// Verbs are regular text, not blanks
+// Prepositions use {___} with no hint
 export const exampleExercises: Record<string, ExerciseSet> = {
   "simple-off": {
     complexity: "simple",
@@ -115,11 +116,11 @@ export const exampleExercises: Record<string, ExerciseSet> = {
     complexity: "simple",
     prepositionsMode: true,
     exercises: [
-      createExercise(1, "Er wartet {prep:?} {d__} Bus.", ["auf", "den"]),
-      createExercise(2, "Sie denkt {prep:?} {ihr__} Freund.", ["an", "ihren"]),
-      createExercise(3, "Ich freue mich {prep:?} {d__} Reise.", ["auf", "die"]),
-      createExercise(4, "Er hilft {(ich)} {prep:?} {d__} Arbeit.", ["mir", "bei", "der"]),
-      createExercise(5, "Sie interessiert sich {prep:?} {d__} Kunst.", ["für", "die"]),
+      createExercise(1, "Er wartet {___} {d__} Bus.", ["auf", "den"]),
+      createExercise(2, "Sie denkt {___} {ihr__} Freund.", ["an", "ihren"]),
+      createExercise(3, "Ich freue mich {___} {d__} Reise.", ["auf", "die"]),
+      createExercise(4, "Er hilft {(ich)} {___} {d__} Arbeit.", ["mir", "bei", "der"]),
+      createExercise(5, "Sie interessiert sich {___} {d__} Kunst.", ["für", "die"]),
     ],
   },
   "intermediate-off": {
@@ -138,12 +139,12 @@ export const exampleExercises: Record<string, ExerciseSet> = {
     complexity: "intermediate",
     prepositionsMode: true,
     exercises: [
-      createExercise(1, "Er denkt {prep:?} {d__} Prüfung, die morgen stattfindet.", ["an", "die"]),
-      createExercise(2, "Sie wartet {prep:?} {ihr__} Freund, der noch arbeitet.", ["auf", "ihren"]),
-      createExercise(3, "Ich freue mich {prep:?} {d__} Geschenk, das du {(ich)} gibst.", ["über", "das", "mir"]),
-      createExercise(4, "Er bittet {(sie)} {prep:?} Hilfe, weil er es allein nicht schafft.", ["sie", "um"]),
-      createExercise(5, "Sie erinnert sich {prep:?} {d__} {schön__} Urlaub.", ["an", "den", "schönen"]),
-      createExercise(6, "Wir sprechen {prep:?} {d__} {neu__} Projekt.", ["über", "das", "neue"]),
+      createExercise(1, "Er denkt {___} {d__} Prüfung, die morgen stattfindet.", ["an", "die"]),
+      createExercise(2, "Sie wartet {___} {ihr__} Freund, der noch arbeitet.", ["auf", "ihren"]),
+      createExercise(3, "Ich freue mich {___} {d__} Geschenk, das du {(ich)} gibst.", ["über", "das", "mir"]),
+      createExercise(4, "Er bittet {(sie)} {___} Hilfe, weil er es allein nicht schafft.", ["sie", "um"]),
+      createExercise(5, "Sie erinnert sich {___} {d__} {schön__} Urlaub.", ["an", "den", "schönen"]),
+      createExercise(6, "Wir sprechen {___} {d__} {neu__} Projekt.", ["über", "das", "neue"]),
     ],
   },
   "advanced-off": {
@@ -152,8 +153,8 @@ export const exampleExercises: Record<string, ExerciseSet> = {
     exercises: [
       createExercise(
         1,
-        "{D__} von {d__} {berühmt__} Wissenschaftler {verb:entwickeln} Theorie wurde von {d__} {international__} Gemeinschaft anerkannt.",
-        ["Die", "dem", "berühmten", "entwickelte", "der", "internationalen"]
+        "{D__} von {d__} {berühmt__} Wissenschaftler entwickelte Theorie wurde von {d__} {international__} Gemeinschaft anerkannt.",
+        ["Die", "dem", "berühmten", "der", "internationalen"]
       ),
       createExercise(
         2,
@@ -172,8 +173,8 @@ export const exampleExercises: Record<string, ExerciseSet> = {
       ),
       createExercise(
         5,
-        "{D__} von {(ich)} gestern {verb:kaufen} Buch, dessen Autor {ein__} {berühmt__} Schriftsteller ist, handelt von {d__} Geschichte {ein__} {alt__} Familie.",
-        ["Das", "mir", "gekaufte", "ein", "berühmter", "der", "einer", "alten"]
+        "{D__} von {(ich)} gestern gekaufte Buch, dessen Autor {ein__} {berühmt__} Schriftsteller ist, handelt von {d__} Geschichte {ein__} {alt__} Familie.",
+        ["Das", "mir", "ein", "berühmter", "der", "einer", "alten"]
       ),
     ],
   },
@@ -183,27 +184,27 @@ export const exampleExercises: Record<string, ExerciseSet> = {
     exercises: [
       createExercise(
         1,
-        "{D__} Wissenschaftler, der sich {prep:?} {d__} Erforschung {d__} {neu__} Medikaments konzentriert, arbeitet {prep:?} {ein__} {wichtig__} Projekt.",
+        "{D__} Wissenschaftler, der sich {___} {d__} Erforschung {d__} {neu__} Medikaments konzentriert, arbeitet {___} {ein__} {wichtig__} Projekt.",
         ["Der", "auf", "die", "des", "neuen", "an", "einem", "wichtigen"]
       ),
       createExercise(
         2,
-        "Obwohl sie sich {prep:?} {d__} {schwierig__} Prüfung vorbereitet hatte, zweifelte sie {prep:?} {ihr__} Fähigkeiten.",
+        "Obwohl sie sich {___} {d__} {schwierig__} Prüfung vorbereitet hatte, zweifelte sie {___} {ihr__} Fähigkeiten.",
         ["auf", "die", "schwierige", "an", "ihren"]
       ),
       createExercise(
         3,
-        "Er denkt oft {prep:?} {d__} Zeit, als er sich {prep:?} {d__} {alt__} Universität {prep:?} {sein__} Studium bewarb.",
+        "Er denkt oft {___} {d__} Zeit, als er sich {___} {d__} {alt__} Universität {___} {sein__} Studium bewarb.",
         ["an", "die", "an", "der", "alten", "um", "sein"]
       ),
       createExercise(
         4,
-        "{D__} Politiker, der sich {prep:?} {d__} Interesse {d__} Bürger einsetzt, kämpft {prep:?} {ein__} {besser__} Zukunft.",
+        "{D__} Politiker, der sich {___} {d__} Interesse {d__} Bürger einsetzt, kämpft {___} {ein__} {besser__} Zukunft.",
         ["Der", "für", "die", "der", "für", "eine", "bessere"]
       ),
       createExercise(
         5,
-        "Sie erinnerte sich {prep:?} {d__} Tag, an dem sie sich {prep:?} {ihr__} {neu__} Stelle bewarb und {prep:?} {d__} Direktor sprach.",
+        "Sie erinnerte sich {___} {d__} Tag, an dem sie sich {___} {ihr__} {neu__} Stelle bewarb und {___} {d__} Direktor sprach.",
         ["an", "den", "um", "ihre", "neue", "mit", "dem"]
       ),
     ],
