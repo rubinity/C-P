@@ -1,3 +1,12 @@
+
+
+🚀[Live Demo](https://v0-cases-and-prepositions.vercel.app/)
+
+⚠️ Important Note
+
+Due to a submission issue, the demo link provided on the Give(a)Go platform is incorrect and cannot be updated.
+For the correct demo, please use the link above.
+
 # Cases and Prepositions
 
 A German grammar exercise app that generates fill-in-the-blank sentences to practice case endings (articles, adjectives, pronouns) and prepositions, with instant feedback and time-per-blank metrics to build automatism.
