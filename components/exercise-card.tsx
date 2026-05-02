@@ -45,7 +45,10 @@ export function ExerciseCard({
 
             return (
               <span key={partIndex} className="inline-flex items-center gap-1">
-                <span className="relative">
+                <span className="relative flex flex-col items-center">
+                  <span className="mb-0.5 text-xs font-medium text-muted-foreground">
+                    {blank.hint}
+                  </span>
                   <Input
                     type="text"
                     value={userAnswer}
