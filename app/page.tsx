@@ -94,7 +94,7 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-card-foreground sm:text-2xl">
-              German Grammar Exercises
+              Cases and Prepositions
             </h1>
             <p className="text-sm text-muted-foreground">
               Practice case usage with verb-preposition structures
