@@ -109,7 +109,7 @@ For "Der kleine Hund" (simple article + adjective):
 - blanks: [{stem:"d", prompt:null, answer:"er"}, {stem:"klein", prompt:null, answer:"e"}]`;
 
   const { output } = await generateText({
-    model: anthropic("claude-sonnet-4-20250514"),
+    model: anthropic("claude-sonnet-4-6"),
     output: Output.object({
       schema: exercisesResponseSchema,
     }),
