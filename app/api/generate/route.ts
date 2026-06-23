@@ -1,5 +1,6 @@
 import { generateText, Output } from "ai";
 import { z } from "zod";
+import { anthropic } from "@ai-sdk/anthropic";
 
 const blankSchema = z.object({
   id: z.string(),
@@ -108,7 +109,7 @@ For "Der kleine Hund" (simple article + adjective):
 - blanks: [{stem:"d", prompt:null, answer:"er"}, {stem:"klein", prompt:null, answer:"e"}]`;
 
   const { output } = await generateText({
-    model: "openai/gpt-4o-mini",
+    model: anthropic("claude-sonnet-4-20250514"),
     output: Output.object({
       schema: exercisesResponseSchema,
     }),
